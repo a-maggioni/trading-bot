@@ -25,8 +25,8 @@ public class Order {
         this.price = price;
         this.quantity = quantity;
         this.amount = price.multiply(quantity);
-        if (type.equals(OrderType.SELL)) {
-            this.amount.negate();
+        if (type.equals(OrderType.BUY)) {
+            this.amount = this.amount.negate();
         }
         this.timestamp = Instant.now().toEpochMilli();
     }
