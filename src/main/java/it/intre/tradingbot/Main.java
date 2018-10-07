@@ -56,7 +56,7 @@ public class Main {
                     Record orderRecord = new KafkaRecord<>(Constants.OUTPUT_TOPIC, order.getSymbol(), order);
                     boolean success = producer.send(orderRecord);
                     if (success) {
-                        logger.info("Sent order: {}", order);
+                        logger.debug("Sent order: {}", order);
                     }
                 }
             }
