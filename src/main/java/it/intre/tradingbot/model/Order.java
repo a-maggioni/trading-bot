@@ -14,6 +14,7 @@ public class Order {
     private BigDecimal price;
     private BigDecimal quantity;
     private BigDecimal amount;
+    private BigDecimal profitLoss;
     private Long timestamp;
 
     public Order() {
@@ -25,9 +26,6 @@ public class Order {
         this.price = price;
         this.quantity = quantity;
         this.amount = price.multiply(quantity);
-        if (type.equals(OrderType.BUY)) {
-            this.amount = this.amount.negate();
-        }
         this.timestamp = Instant.now().toEpochMilli();
     }
 
@@ -69,6 +67,14 @@ public class Order {
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
+    }
+
+    public BigDecimal getProfitLoss() {
+        return profitLoss;
+    }
+
+    public void setProfitLoss(BigDecimal profitLoss) {
+        this.profitLoss = profitLoss;
     }
 
     public Long getTimestamp() {

@@ -22,6 +22,7 @@ public abstract class Bot {
     protected Strategy strategy;
     private BigDecimal maxAmount;
     private TradingRecord tradingRecord;
+    private Order lastEntry;
     private BigDecimal totalQuantity;
     private boolean firstBarDiscarded;
 
@@ -89,17 +90,18 @@ public abstract class Bot {
         );
         if (entered) {
             order = new Order(OrderType.BUY, quote.getSymbol(), price, quantity);
-            this.afterEnter(quantity);
+            this.afterEnter(order, quantity);
             this.logger.info("Entered: {}", order);
         }
         return order;
     }
 
-    private BigDecimal computeQuantity(BigDecimal price) {
+    private BigDecimal computeQuantity(final BigDecimal price) {
         return this.maxAmount.divide(price, BigDecimal.ROUND_FLOOR);
     }
 
-    private void afterEnter(final BigDecimal quantity) {
+    private void afterEnter(final Order order, final BigDecimal quantity) {
+        this.lastEntry = order;
         this.totalQuantity = this.totalQuantity.add(quantity);
     }
 
@@ -114,13 +116,15 @@ public abstract class Bot {
         );
         if (exited) {
             order = new Order(OrderType.SELL, quote.getSymbol(), price, quantity);
-            this.afterExit(quantity);
+            this.afterExit(order, quantity);
             this.logger.info("Exited: {}", order);
         }
         return order;
     }
 
-    private void afterExit(final BigDecimal quantity) {
+    private void afterExit(final Order order, final BigDecimal quantity) {
+        BigDecimal profitLoss = order.getAmount().subtract(lastEntry.getAmount());
+        order.setProfitLoss(profitLoss);
         this.totalQuantity = this.totalQuantity.subtract(quantity);
     }
 }
