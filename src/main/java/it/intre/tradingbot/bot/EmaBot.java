@@ -19,7 +19,7 @@ public class EmaBot extends Bot {
     @Override
     protected void buildStrategy() {
         ClosePriceIndicator closePriceIndicator = new ClosePriceIndicator(this.timeSeries);
-        EMAIndicator emaIndicator = new EMAIndicator(closePriceIndicator, this.strategyTimeFrame);
+        EMAIndicator emaIndicator = new EMAIndicator(closePriceIndicator, this.timeFrame);
         this.strategy = new BaseStrategy(
                 new CrossedDownIndicatorRule(closePriceIndicator, emaIndicator),
                 new CrossedUpIndicatorRule(closePriceIndicator, emaIndicator)
