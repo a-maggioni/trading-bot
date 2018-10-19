@@ -6,15 +6,13 @@ public class BotConfiguration {
 
     private BotType botType;
     private String timeSeriesName;
-    private int barTimeFrame;
-    private int strategyTimeFrame;
+    private int timeFrame;
     private BigDecimal maxAmount;
 
-    public BotConfiguration(final BotType botType, final int barTimeFrame, final int strategyTimeFrame, final BigDecimal maxAmount) {
+    public BotConfiguration(final BotType botType, final int timeFrame, final BigDecimal maxAmount) {
         this.botType = botType;
         this.timeSeriesName = botType + "TimeSeries";
-        this.barTimeFrame = barTimeFrame;
-        this.strategyTimeFrame = strategyTimeFrame;
+        this.timeFrame = timeFrame;
         this.maxAmount = maxAmount;
     }
 
@@ -34,20 +32,12 @@ public class BotConfiguration {
         this.timeSeriesName = timeSeriesName;
     }
 
-    public int getBarTimeFrame() {
-        return barTimeFrame;
+    public int getTimeFrame() {
+        return timeFrame;
     }
 
-    public void setBarTimeFrame(int barTimeFrame) {
-        this.barTimeFrame = barTimeFrame;
-    }
-
-    public int getStrategyTimeFrame() {
-        return strategyTimeFrame;
-    }
-
-    public void setStrategyTimeFrame(int strategyTimeFrame) {
-        this.strategyTimeFrame = strategyTimeFrame;
+    public void setTimeFrame(int timeFrame) {
+        this.timeFrame = timeFrame;
     }
 
     public BigDecimal getMaxAmount() {

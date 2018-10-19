@@ -10,10 +10,10 @@ import it.intre.messagedispatcher.producer.Producer;
 import it.intre.tradingbot.bot.Bot;
 import it.intre.tradingbot.bot.EmaBot;
 import it.intre.tradingbot.common.Constants;
+import it.intre.tradingbot.model.Bar;
 import it.intre.tradingbot.model.BotConfiguration;
 import it.intre.tradingbot.model.BotType;
 import it.intre.tradingbot.model.Order;
-import it.intre.tradingbot.model.Quote;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,27 +31,26 @@ public class Main {
         final String port = commandLine.getOptionValue("port");
         final int type = ((Number) commandLine.getParsedOptionValue("type")).intValue();
         final BotType botType = BotType.values()[type];
-        final int barTimeFrame = ((Number) commandLine.getParsedOptionValue("barTimeFrame")).intValue();
-        final int strategyTimeFrame = ((Number) commandLine.getParsedOptionValue("strategyTimeFrame")).intValue();
+        final int timeFrame = ((Number) commandLine.getParsedOptionValue("timeFrame")).intValue();
         final BigDecimal maxAmount = new BigDecimal((commandLine.getParsedOptionValue("maxAmount")).toString());
-        final BotConfiguration botConfiguration = new BotConfiguration(botType, barTimeFrame, strategyTimeFrame, maxAmount);
+        final BotConfiguration botConfiguration = new BotConfiguration(botType, timeFrame, maxAmount);
 
         Map<String, Bot> botMap = new HashMap<>();
         KafkaConfiguration inputConfiguration = new KafkaConfiguration(host, port, Constants.GROUP_ID, Constants.CLIENT_ID, Constants.INPUT_TOPIC);
-        Consumer consumer = new KafkaConsumer<>(inputConfiguration, String.class, Quote.class);
+        Consumer consumer = new KafkaConsumer<>(inputConfiguration, String.class, Bar.class);
         KafkaConfiguration outputConfiguration = new KafkaConfiguration(host, port, Constants.GROUP_ID, Constants.CLIENT_ID, Constants.OUTPUT_TOPIC);
-        Producer producer = new KafkaProducer<String, Quote>(outputConfiguration);
+        Producer producer = new KafkaProducer<String, Order>(outputConfiguration);
 
         while (true) {
-            List<Record<String, Quote>> quotesRecords = consumer.receive();
-            for (Record<String, Quote> quoteRecord : quotesRecords) {
-                String symbol = quoteRecord.getKey();
-                Quote quote = quoteRecord.getValue();
+            List<Record<String, Bar>> barsRecords = consumer.receive();
+            for (Record<String, Bar> barRecord : barsRecords) {
+                String symbol = barRecord.getKey();
+                Bar bar = barRecord.getValue();
                 if (!botMap.containsKey(symbol)) {
                     botMap.put(symbol, getBot(botConfiguration));
                 }
                 Bot bot = botMap.get(symbol);
-                Order order = bot.executeStrategy(quote);
+                Order order = bot.executeStrategy(bar);
                 if (order != null) {
                     Record orderRecord = new KafkaRecord<>(Constants.OUTPUT_TOPIC, order.getSymbol(), order);
                     boolean success = producer.send(orderRecord);
@@ -94,14 +93,10 @@ public class Main {
         type.setType(Number.class);
         type.setRequired(true);
         options.addOption(type);
-        Option barTimeFrame = new Option("btf", "barTimeFrame", true, "Bar time frame (minutes)");
-        barTimeFrame.setType(Number.class);
-        barTimeFrame.setRequired(true);
-        options.addOption(barTimeFrame);
-        Option strategyTimeFrame = new Option("stf", "strategyTimeFrame", true, "Strategy time frame");
-        strategyTimeFrame.setType(Number.class);
-        strategyTimeFrame.setRequired(true);
-        options.addOption(strategyTimeFrame);
+        Option timeFrame = new Option("tf", "timeFrame", true, "Time frame");
+        timeFrame.setType(Number.class);
+        timeFrame.setRequired(true);
+        options.addOption(timeFrame);
         Option maxAmount = new Option("ma", "maxAmount", true, "Max amount (per order)");
         maxAmount.setType(Number.class);
         maxAmount.setRequired(true);
